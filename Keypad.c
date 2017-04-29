@@ -1,5 +1,7 @@
 #include  <msp430g2553.h>
 
+#define arraySizeKey 20
+
     const char keyMap[4][3] = {
     {'1','2','3'},
     {'4','5','6'},
@@ -9,28 +11,25 @@
 
     const char rowPins[4] = {BIT4, BIT5, BIT6, BIT7};
     const char colPins[3] = {BIT0, BIT1, BIT2};
+    volatile int arrayInputs[arraySizeKey] = {0};
     volatile int value;
-    volatile int x;
-
+    volatile int x = 0;
 
     void main(void)
     {
-            //Kill WDT and setup clocks
             WDTCTL = WDTPW + WDTHOLD;
-            BCSCTL1 = CALBC1_1MHZ;
-            DCOCTL = CALDCO_1MHZ;
-
             //Port Setup
             P1DIR = BIT4 + BIT5 + BIT6 + BIT7;         // Enable P1 outputs used for row scanning
             P1OUT &= ~(BIT4 + BIT5 + BIT6 + BIT7);   // Set outputs to LOW
-
             P2REN |= BIT0 + BIT1 + BIT2;                // Enable weak pull up resistors on the P2 inputs used for column scanning.
             //Timer interrupt used to read the keypad to see if a key is being pressed
             CCTL0 = CCIE;
             CCR0 = 30000;
             TACTL = TASSEL_2 + MC_1;
+            _BIS_SR(LPM0_bits + GIE); // LPM0 + interrupt
 
-            _BIS_SR(LPM0_bits + GIE);                 // LPM0 + interrupt
+            while(1){}
+
     }
 
     // TimerA0 ISR
@@ -44,14 +43,15 @@
                     for(j=0; j < 3; j++){
                             if(!(P2IN & colPins[j])){
                                     value = keyMap[i][j];
+                                    arrayInputs[x] = value;
+                                    x = x +1;
                                     while(!(P2IN & colPins[j])); //blocking while a key is held down
                             }
                     }
                     P1OUT |= rowPins[i]; //row HIGH
             }
     }
-
-/*#include  <msp430g2553.h>
+/*#include  <msp430g2553.h> // Only volatile input
 #define ArraySize 100
 
     const char keyMap[4][3] = {
