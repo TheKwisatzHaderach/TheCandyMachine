@@ -1,4 +1,6 @@
 #include  <msp430g2553.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #define arraySizeKey 20
 
@@ -12,6 +14,7 @@
     const char rowPins[4] = {BIT4, BIT5, BIT6, BIT7};
     const char colPins[3] = {BIT0, BIT1, BIT2};
     volatile int arrayInputs[arraySizeKey] = {0};
+    volatile char arrayInputsC[arraySizeKey] = {0};
     volatile int value;
     volatile int x = 0;
 
@@ -44,6 +47,7 @@
                             if(!(P2IN & colPins[j])){
                                     value = keyMap[i][j];
                                     arrayInputs[x] = value;
+                                    arrayInputsC[x] = (char) value;
                                     x = x +1;
                                     while(!(P2IN & colPins[j])); //blocking while a key is held down
                             }
@@ -51,6 +55,7 @@
                     P1OUT |= rowPins[i]; //row HIGH
             }
     }
+
 /*#include  <msp430g2553.h> // Only volatile input
 #define ArraySize 100
 
