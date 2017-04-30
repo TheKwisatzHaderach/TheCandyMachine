@@ -29,7 +29,7 @@
             CCTL0 = CCIE;
             CCR0 = 30000;
             TACTL = TASSEL_2 + MC_1;
-            _BIS_SR(LPM0_bits + GIE); // LPM0 + interrupt
+            _BIS_SR(GIE); // LPM0 + interrupt
 
             while(1){}
 
@@ -95,7 +95,7 @@
             flag = 0;
             x = 0;
 
-            _BIS_SR(LPM0_bits + GIE);                 // LPM0 + interrupt
+            _BIS_SR(GIE);                 // LPM0 + interrupt
             while(1)
             {
             }
