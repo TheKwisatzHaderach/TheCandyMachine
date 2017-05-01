@@ -7,7 +7,7 @@ unsigned long ReadCount(){
 	unsigned long Count; // long = 4bytes/32bits Count == 25bits
 	unsigned char i; //iterable
 	P1DIR = 0x01;
-	P2DIR |= 0x00;
+	P2DIR &= ~BIT0;
 	P1OUT = 0x00; // sets clock to low
 	Count=0;
 	for (i=0;i<24;i++) // Sends clock 25 clock pulses (Gain of 128)
