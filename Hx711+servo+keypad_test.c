@@ -1,9 +1,14 @@
 #include  <msp430g2553.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include "Servos.h"
 
 #define arraySizeKey 50
 #define tagInputCount 1 //minimum of 1
+
+#define A 1//toppingA
+#define B 0//toppingB
+
+static unsigned int Tare(unsigned long AReading);
+static unsigned long ReadCount();
 
     const char keyMap[4][3] = {
     {'1','2','3'},
@@ -15,7 +20,6 @@
     const char rowPins[4] = {BIT4, BIT5, BIT3, BIT1};
     const char colPins[3] = {BIT3, BIT4, BIT5};
     volatile int arrayInputs[arraySizeKey] = {0};
-    //volatile char arrayInputsC[arraySizeKey] = {0};
     volatile int value;
     unsigned int candyA;
     unsigned int candyB;
@@ -25,6 +29,7 @@
     volatile int x;
     unsigned int tagcount;
     unsigned int tagFlag;
+
 
 
     void main(void)
@@ -52,11 +57,14 @@
             int cFlag = 0;
             int tAFlag = 0;
             int tBFlag = 0;
+
+            //hx711
+
             for(z = 0; z<arraySizeKey; z++) // clears array
             {
             	arrayInputs[z] = 0;
             }
-            _BIS_SR(GIE); // LPM0 + interrupt
+            _BIS_SR(GIE); // interrupt
 
 
             while(tagcount < tagInputCount)
@@ -124,6 +132,45 @@
             		}
             	}
             }
+            _BIC_SR(GIE); //disable interupt
+    		unsigned long reading = 0;
+    		signed int cReading = 0;
+    		static unsigned int zeroed;
+
+            reading = ReadCount();
+            zeroed = Tare(reading);
+
+            positionServos();// positions servos
+
+    		while(cReading < candyA)
+    		{
+    			ServoONE();
+    			cReading = (ReadCount() / 1000) - zeroed;
+    			__delay_cycles(1000000);
+   			}
+    		while(cReading < (candyB+candyA))
+    		{
+    				ServoTWO();
+    				cReading = (ReadCount() / 1000) - zeroed;
+    				__delay_cycles(1000000);
+    		}
+    		while(cReading < (candyC + candyB + candyA))
+    		{
+    				ServoTHREE();
+    				cReading = (ReadCount() / 1000) - zeroed;
+    				__delay_cycles(1000000);
+    		}
+    		if(toppingA == 1)
+    		{
+    			ServoFOUR(A); //need to pass in value for specific topping
+    		}
+    		if(toppingB == 1)
+    		{
+    			ServoFOUR(B); //need to pass in value for specific topping
+   			}
+    	cReading = 0;
+
+
     	}
     }
 
@@ -139,7 +186,6 @@
                             if(!(P2IN & colPins[j])){
                                     value = keyMap[i][j];
                                     arrayInputs[x] = value;
-                                    //arrayInputsC[x] = (char) value;
                                     x = x +1;
                                     if(x >= arraySizeKey)
                                     {
@@ -152,88 +198,32 @@
             }
     }
 
-/*
-#include <msp430g2553.h>
-#include "Servos.h"
-#include "HX711S.h"
-#include <stdlib.h>
-#include <stdio.h>
+    static unsigned int Tare(unsigned long AReading)
+    {
+    	return (AReading / 1000);
+    }
 
-#define A 1
-#define B 0
-
-
-
-
-void main(void) {
-
-
-
-	    while(1)
-
-
-	    //Hx711 Setup
-		WDTCTL = WDTPW | WDTHOLD;
-		unsigned long reading = 0;
-		signed int cReading = 0;
-		unsigned int zeroed;
-		reading = ReadCount();
-		zeroed = Tare(reading);
-		__delay_cycles(125000);
-		positionServos();
-		//cReading = (ReadCount() / 1000) - zeroed;
-		//__delay_cycles(125000); // must wait to read
+    static unsigned long ReadCount()// Must have 125000 clck cycles between readings
+    {
+    	unsigned long Count; // long = 4bytes/32bits Count == 25bits
+    	unsigned char i; //iterable
+    	P1SEL &= (~BIT0); // Set P1.0 SEL for GPIO
+    	P1DIR |= BIT0; // Set P1.0 as Output
+    	P2SEL &= (~BIT0);
+    	P2DIR &= (~BIT0); // Set P2.0 SEL as Input
+    	P1OUT &= (~BIT0); // sets clock to low
+    	Count=0;
+    	for (i=0;i<24;i++) // Sends clock 25 clock pulses (Gain of 128)
+    	{
+    		P1OUT |= BIT0; // Set P1.0 HIGH
+    		Count=Count<<1; //shifts bit
+    		P1OUT &= (~BIT0); //clock low
+    		if(P2IN & BIT0) Count++; // increment count if Dout is high
+    	}
+    	P1OUT |= BIT0; // Set P1.0 HIGH
+    	Count=Count^0x800000; // ^ is xor operator 0x800000 = b100000000000000000000000
+    	P1OUT &= (~BIT0);
+    	return(Count); // returns reading value from scale
+    }
 
 
-		while(1)
-			{
-				while(cReading < candyA)
-				{
-					ServoONE();
-					cReading = (ReadCount() / 1000) - zeroed;
-					__delay_cycles(1000000);
-				}
-				while(cReading < (candyB+candyA))
-				{
-					ServoTWO();
-					cReading = (ReadCount() / 1000) - zeroed;
-					__delay_cycles(1000000);
-				}
-				while(cReading < (candyC + candyB + candyA))
-				{
-					ServoTHREE();
-					cReading = (ReadCount() / 1000) - zeroed;
-					__delay_cycles(1000000);
-				}
-				if(toppingA == 1)
-				{
-					ServoFOUR(A); //need to pass in value for specific topping
-				}
-				if(toppingB == 1)
-				{
-					ServoFOUR(B); //need to pass in value for specific topping
-				}
-				cReading = 0;
-
-			}
-}
-#pragma vector=TIMER0_A0_VECTOR
-__interrupt void Timer_A (void)
-{
-        char i;
-        char j;
-        for(i=0; i < 4; i++){
-                P1OUT &= ~rowPins[i];  //row LOW
-                for(j=0; j < 3; j++){
-                        if(!(P2IN & colPins[j])){
-                                value = keyMap[i][j];
-                                arrayInputs[x] = value;
-                                //arrayInputsC[x] = (char) value;
-                                x = x +1;
-                                while(!(P2IN & colPins[j])); //blocking while a key is held down
-                        }
-                }
-                P1OUT |= rowPins[i]; //row HIGH
-        }
-}
-*/
