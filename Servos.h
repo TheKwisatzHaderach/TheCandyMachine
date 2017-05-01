@@ -105,8 +105,8 @@ void ServoONE(void){
 	TA0CCR1	= PWM_Duty;            // TACCR1 PWM Duty Cycle
 	P2DIR &= ~BIT6;
 	P2REN &= ~BIT6;
-	P1DIR	|= BIT6;               // P1.2 = output
-	P1SEL	|= BIT6;
+	P1DIR	|= BIT2;               // P1.2 = output
+	P1SEL	|= BIT2;
 
 
 	// Main loop
@@ -183,8 +183,8 @@ void ServoTHREE(void){
 	TA0CCR0	= PWM_Period-1;        // PWM Period
 	TA0CCR1	= PWM_Duty;            // TACCR1 PWM Duty Cycle
 	//TA0CCTL1	= OUTMOD_7;            // TACCR1 reset/set
-	P1DIR &= ~BIT6;
-	P1REN &= ~BIT6;
+	P1DIR &= ~BIT2;
+	P1REN &= ~BIT2;
 	P2DIR |= BIT6;                                   //Set xin as output
 	P2SEL &= ~BIT7;                              //Reset Xout select1
 	P2SEL |= BIT6;                                  //Set xin select1
@@ -251,4 +251,3 @@ void ServoFOUR(topping){
 }
 
 #endif /* SERVOS_H_ */
-
