@@ -38,7 +38,7 @@ static unsigned long ReadCount();
     	{
             WDTCTL = WDTPW + WDTHOLD;
             //Port Setup
-            P1DIR = BIT4 + BIT5 + BIT3 + BIT1;         // Enable P1 outputs used for row scanning
+            P1DIR |= BIT4 + BIT5 + BIT3 + BIT1;         // Enable P1 outputs used for row scanning
             P1OUT &= ~(BIT4 + BIT5 + BIT3 + BIT1);   // Set outputs to LOW
             P2REN |= BIT3 + BIT4 + BIT5;                // Enable weak pull up resistors on the P2 inputs used for column scanning.
             //Timer interrupt used to read the keypad to see if a key is being pressed
