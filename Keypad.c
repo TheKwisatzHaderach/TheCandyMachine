@@ -1,6 +1,5 @@
 #include  <msp430g2553.h>
-#include <stdlib.h>
-#include <stdio.h>
+
 
 #define arraySizeKey 20
 
@@ -22,7 +21,7 @@
     {
             WDTCTL = WDTPW + WDTHOLD;
             //Port Setup
-            P1DIR = BIT4 + BIT5 + BIT3 + BIT7;         // Enable P1 outputs used for row scanning
+            P1DIR |= BIT4 + BIT5 + BIT3 + BIT7;         // Enable P1 outputs used for row scanning
             P1OUT &= ~(BIT4 + BIT5 + BIT3 + BIT7);   // Set outputs to LOW
             P2REN |= BIT3 + BIT4 + BIT5;                // Enable weak pull up resistors on the P2 inputs used for column scanning.
             //Timer interrupt used to read the keypad to see if a key is being pressed
