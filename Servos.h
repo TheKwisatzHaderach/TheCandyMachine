@@ -23,8 +23,7 @@ void positionServos(void)
 		// Calculate the step value and define the current step, defaults to minimum.
 		servo_stepval 	= ( (SERVO_MAX - SERVO_MIN) / SERVO_STEPS );
 		servo_stepnow	= SERVO_MIN;
-
-		// Fill up the LUT
+		// Fill up the LUTN;
 		for (i = 0;i<SERVO_STEPS; i++) {
 			servo_stepnow += servo_stepval;
 			servo_lut[i] = servo_stepnow;
@@ -113,9 +112,9 @@ void ServoONE(void){
 
 
 	TA0CCR1 = servo_lut[0]; //0
-	__delay_cycles(1000000);
+	__delay_cycles(500000);
 	TA0CCR1 = servo_lut[40]; //40
-  	__delay_cycles(1000000);
+  	__delay_cycles(500000); //1000000 is 1 second
 
 
 
@@ -152,9 +151,9 @@ void ServoTWO(void){
 
 
 	TA1CCR1 = servo_lut[0]; //0
-	__delay_cycles(1000000);
+	__delay_cycles(500000);
 	TA1CCR1 = servo_lut[40]; //40
-  	__delay_cycles(1000000);
+  	__delay_cycles(500000);
 
 
 
@@ -196,9 +195,9 @@ void ServoTHREE(void){
 
 
 	TA0CCR1 = servo_lut[0]; //0
-	__delay_cycles(1000000);
+	__delay_cycles(500000);
 	TA0CCR1 = servo_lut[40]; //40
-  	__delay_cycles(1000000);
+  	__delay_cycles(500000);
 
 
 
@@ -235,17 +234,17 @@ void ServoFOUR(topping){
 
 	if(topping == 1)
 	{
-		TA1CCR1 = servo_lut[170]; //40
-	  	__delay_cycles(1000000);
-	  	TA1CCR1 = servo_lut[90]; //0
-	  	__delay_cycles(1000000);
+		TA1CCR1 = servo_lut[90]; //40
+	  	__delay_cycles(500000);
+	  	TA1CCR1 = servo_lut[1]; //0
+	  	__delay_cycles(500000);
 	}
 	else
 	{
-		TA1CCR1 = servo_lut[10]; //40
-		__delay_cycles(1000000);
-		TA1CCR1 = servo_lut[90]; //0
-		__delay_cycles(1000000);
+		TA1CCR1 = servo_lut[90]; //40
+		__delay_cycles(500000);
+		TA1CCR1 = servo_lut[178]; //0
+		__delay_cycles(500000);
 
 	}
 }
